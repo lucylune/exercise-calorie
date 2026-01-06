@@ -12,8 +12,9 @@
     input, select, button { width: 100%; padding: 10px; margin-top: 6px; font-size: 16px; }
     button { background: #2563eb; color: white; border: none; border-radius: 6px; }
     .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .day { border: 1px solid #ddd; border-radius: 6px; padding: 4px; text-align: center; font-size: 12px; }
+    .day { border: 1px solid #ddd; border-radius: 6px; padding: 4px; text-align: center; font-size: 12px; cursor: pointer; }
     .kcal { color: #2563eb; font-size: 11px; }
+    ul { padding-left: 16px; }
   </style>
 </head>
 <body>
@@ -23,7 +24,7 @@
 <div class="card">
   <h2>이번 달 총 운동 칼로리</h2>
   <h1 id="monthTotal">0 kcal</h1>
-  <canvas id="monthStackChart" style="margin-top:12px"></canvas>
+  <canvas id="monthStackChart" height="80"></canvas>
 </div>
 
 <div class="card">
@@ -51,7 +52,6 @@
   <h2>📋 선택한 날짜 운동 상세</h2>
   <ul id="detailList"></ul>
 </div>
-</div>
 
 <div class="card">
   <h2>📊 운동 종목별 칼로리</h2>
@@ -60,69 +60,18 @@
 
 <script>
   const records = JSON.parse(localStorage.getItem("exerciseRecords") || "[]");
+  let exerciseChart, monthStackChart;
 
   function addRecord() {
     const date = document.getElementById("date").value;
     const exercise = document.getElementById("exercise").value;
     const calorie = Number(document.getElementById("calorie").value);
     const time = Number(document.getElementById("time").value);
-
     if (!date || !exercise || !calorie || !time) return;
 
     records.push({ date, exercise, calorie, time });
     localStorage.setItem("exerciseRecords", JSON.stringify(records));
     render();
-
-  function drawMonthStack(data) {
-    const ctx = document.getElementById('monthStackChart');
-    if (monthStackChart) monthStackChart.destroy();
-
-    const colors = {
-      '수영': '#3b82f6',
-      '달리기': '#22c55e',
-      '런닝머신': '#f97316',
-      '걷기': '#a855f7',
-      '웨이트 트레이닝': '#ef4444'
-    };
-
-    const datasets = Object.keys(data).map(ex => ({
-      label: ex,
-      data: [data[ex]],
-      backgroundColor: colors[ex] || '#999'
-    }));
-
-    monthStackChart = new Chart(ctx, {
-      type: 'bar',
-      data: { labels: ['이번 달'], datasets },
-      options: {
-        indexAxis: 'y',
-        plugins: { legend: { position: 'bottom' } },
-        scales: {
-          x: { stacked: true, beginAtZero: true },
-          y: { stacked: true }
-        }
-      }
-    });
-  }
-
-  function showDetail(date) {
-    const list = document.getElementById("detailList");
-    const card = document.getElementById("detailCard");
-    list.innerHTML = "";
-
-    const filtered = records.filter(r => r.date === date);
-    if (filtered.length === 0) {
-      list.innerHTML = "<li>운동 기록 없음</li>";
-    } else {
-      filtered.forEach(r => {
-        list.innerHTML += `<li>🏃 ${r.exercise} / ${r.time}분 / ${r.calorie}kcal</li>`;
-      });
-    }
-
-    card.style.display = "block";
-    card.scrollIntoView({ behavior: "smooth" });
-  }
-
     document.getElementById("calorie").value = "";
     document.getElementById("time").value = "";
   }
@@ -142,46 +91,79 @@
 
     document.getElementById("monthTotal").innerText = monthTotal + " kcal";
 
+    // 캘린더
     const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
     const cal = document.getElementById("calendar");
     cal.innerHTML = "";
-
     for (let i=1;i<=daysInMonth;i++) {
       const d = `${monthKey}-${String(i).padStart(2,"0")}`;
       cal.innerHTML += `
         <div class="day" onclick="showDetail('${d}')">
-          ${i}<br />
-          <span class="kcal">${calendarMap[d] ? calendarMap[d] + "kcal" : ""}</span>
+          ${i}<br>
+          <span class="kcal">${calendarMap[d] ? calendarMap[d]+"kcal" : ""}</span>
         </div>`;
     }
 
-    drawChart(exerciseMap);
-    drawMonthStack(exerciseMap);
+    drawExerciseChart(exerciseMap);
+    drawMonthStackChart(exerciseMap);
   }
 
-  let chart;
-let monthStackChart;
-  function drawChart(data) {
-    const ctx = document.getElementById('exerciseChart');
-    if (chart) chart.destroy();
+  function showDetail(date) {
+    const list = document.getElementById("detailList");
+    const card = document.getElementById("detailCard");
+    list.innerHTML = "";
+    const filtered = records.filter(r => r.date === date);
 
-    chart = new Chart(ctx, {
-      type: 'bar',
+    if (filtered.length === 0) {
+      list.innerHTML = "<li>운동 기록 없음</li>";
+    } else {
+      filtered.forEach(r => {
+        list.innerHTML += `<li>🏃 ${r.exercise} / ${r.time}분 / ${r.calorie}kcal</li>`;
+      });
+    }
+    card.style.display = "block";
+    card.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function drawExerciseChart(data) {
+    const ctx = document.getElementById("exerciseChart");
+    if (exerciseChart) exerciseChart.destroy();
+    exerciseChart = new Chart(ctx, {
+      type: "bar",
       data: {
         labels: Object.keys(data),
         datasets: [{
-          label: '칼로리 (kcal)',
-          data: Object.values(data)
+          data: Object.values(data),
+          backgroundColor: ["#3b82f6","#22c55e","#f97316","#a855f7","#ef4444"]
         }]
       },
+      options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+    });
+  }
+
+  function drawMonthStackChart(data) {
+    const ctx = document.getElementById("monthStackChart");
+    if (monthStackChart) monthStackChart.destroy();
+
+    const colors = {
+      "수영":"#3b82f6","달리기":"#22c55e","런닝머신":"#f97316",
+      "걷기":"#a855f7","웨이트 트레이닝":"#ef4444"
+    };
+
+    monthStackChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["이번 달"],
+        datasets: Object.keys(data).map(k => ({
+          label: k,
+          data: [data[k]],
+          backgroundColor: colors[k]
+        }))
+      },
       options: {
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: true }
-        },
-        scales: {
-          y: { beginAtZero: true }
-        }
+        indexAxis: "y",
+        scales: { x:{stacked:true}, y:{stacked:true} },
+        plugins: { legend:{position:"bottom"} }
       }
     });
   }
