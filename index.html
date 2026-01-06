@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>운동 칼로리</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 16px; background: #f7f7f7; }
+    .card { background: white; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+    h1, h2 { margin: 8px 0; }
+    input, select, button {
+      width: 100%; padding: 10px; margin-top: 6px; font-size: 16px;
+    }
+    button { background: #2563eb; color: white; border: none; border-radius: 6px; }
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .day { background: #fff; border-radius: 6px; padding: 6px; text-align: center; font-size: 12px; }
+    .kcal { color: #2563eb; font-size: 11px; }
+  </style>
+</head>
+<body>
+
+<h1 style="text-align:center">🏃 운동 칼로리</h1>
+
+<div class="card">
+  <h2>이번 달 총 칼로리</h2>
+  <h1 id="total">0 kcal</h1>
+</div>
+
+<div class="card">
+  <h2>운동 기록</h2>
+  <input type="datetime-local" id="date">
+  <select id="exercise">
+    <option value="">운동 선택</option>
+    <option>수영</option>
+    <option>달리기</option>
+    <option>런닝머신</option>
+    <option>걷기</option>
+    <option>웨이트</option>
+  </select>
+  <input type="number" id="calorie" placeholder="칼로리">
+  <button onclick="add()">추가</button>
+</div>
+
+<div class="card">
+  <h2>📅 이번 달 기록</h2>
+  <div class="calendar" id="calendar"></div>
+</div>
+
+<script>
+  const records = JSON.parse(localStorage.getItem("records") || "[]");
+
+  function save() {
+    localStorage.setItem("records", JSON.stringify(records));
+    render();
+  }
+
+  function add() {
+    const date = document.getElementById("date").value;
+    const exercise = document.getElementById("exercise").value;
+    const calorie = Number(document.getElementById("calorie").value);
+    if (!date || !exercise || !calorie) return;
+    records.push({ date, exercise, calorie });
+    save();
+    document.getElementById("calorie").value = "";
+  }
+
+  function render() {
+    const now = new Date();
+    const month = now.toISOString().slice(0,7);
+    let total = 0;
+    const map = {};
+
+    records.forEach(r => {
+      if (r.date.startsWith(month)) total += r.calorie;
+      const d = r.date.slice(0,10);
+      map[d] = (map[d] || 0) + r.calorie;
+    });
+
+    document.getElementById("total").innerText = total + " kcal";
+
+    const days = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+    const cal = document.getElementById("calendar");
+    cal.innerHTML = "";
+
+    for (let i=1;i<=days;i++) {
+      const d = `${month}-${String(i).padStart(2,"0")}`;
+      cal.innerHTML += `
+        <div class="day">
+          ${i}<br>
+          <span class="kcal">${map[d] ? map[d]+"kcal" : ""}</span>
+        </div>`;
+    }
+  }
+
+  render();
+</script>
+
+</body>
+</html>
