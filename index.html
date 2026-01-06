@@ -168,7 +168,7 @@
       <h1 id="monthTotal">0 kcal</h1>
       <div class="summary-bar" id="summaryBar"></div>
       <div class="legend" id="legend"></div>
-      <p id="goalText" style="margin-top:6px;font-size:13px;color:#333"></p>
+      <p id="goalText" style="margin-top:14px;font-size:16px;font-weight:700;color:#7F7F7F"></p>
     </div>
 
     <div class="card">
@@ -294,7 +294,17 @@ function render(){
   monthTotal.innerText=total+' kcal';
 
   const goal=6000;
-  const remain=Math.max(goal-total,0);
+  const diff = total - goal;
+  const goalText = document.getElementById('goalText');
+
+  if(diff < 0){
+    const remain = Math.abs(diff);
+    goalText.innerHTML = `${goal.toLocaleString()}kcal 달성까지 <span style="color:#FF6363">${remain.toLocaleString()}kcal</span> 남았어요!`;
+  } else if(diff > 0){
+    goalText.innerHTML = `짝짝짝! <span style="color:#01888C">${diff.toLocaleString()}kcal</span> 더 태웠어요 🎉`;
+  } else {
+    goalText.innerHTML = `${goal.toLocaleString()}kcal 목표 달성 🎯`;
+  }
   document.getElementById('goalText').innerText=
     remain>0 ? `${goal.toLocaleString()}kcal 달성까지 ${remain.toLocaleString()}kcal 남았어요!` : `${goal.toLocaleString()}kcal 목표 달성 🎉`;
 
