@@ -168,6 +168,7 @@
       <h1 id="monthTotal">0 kcal</h1>
       <div class="summary-bar" id="summaryBar"></div>
       <div class="legend" id="legend"></div>
+      <p id="goalText" style="margin-top:6px;font-size:13px;color:#333"></p>
     </div>
 
     <div class="card">
@@ -292,6 +293,11 @@ function render(){
 
   monthTotal.innerText=total+' kcal';
 
+  const goal=6000;
+  const remain=Math.max(goal-total,0);
+  document.getElementById('goalText').innerText=
+    remain>0 ? `${goal.toLocaleString()}kcal 달성까지 ${remain.toLocaleString()}kcal 남았어요!` : `${goal.toLocaleString()}kcal 목표 달성 🎉`;
+
   summaryBar.innerHTML=''; legend.innerHTML='';
   Object.keys(map).forEach(k=>{
     const bar=document.createElement('div');
@@ -350,12 +356,16 @@ function removeRecord(i){
 function drawLine(map){
   const ctx=document.getElementById('lineChart');
   if(lineChart) lineChart.destroy();
+
+  const values=Object.values(map);
+  const maxVal=Math.max(...values, 0);
+
   lineChart=new Chart(ctx,{
     type:'line',
     data:{
       labels:Object.keys(map),
       datasets:[{
-        data:Object.values(map),
+        data:values,
         borderColor:'#27B2A5',
         pointRadius:4,
         pointBackgroundColor:'#FF6363',
@@ -363,20 +373,39 @@ function drawLine(map){
       }]
     },
     options:{
-      scales:{ x:{ display:true }, y:{ display:false } },
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{
+        x:{ display:true },
+        y:{
+          display:false,
+          suggestedMin:0,
+          suggestedMax:maxVal * 1.25
+        }
+      },
       plugins:{ legend:{ display:false }, tooltip:{ enabled:false } },
       animation:false
     },
     plugins:[{
       afterDatasetsDraw(chart){
         const ctx=chart.ctx;
+        const meta=chart.getDatasetMeta(0);
+        const chartArea=chart.chartArea;
+
         ctx.save();
-        chart.data.datasets[0].data.forEach((v,i)=>{
-          const p=chart.getDatasetMeta(0).data[i];
+        meta.data.forEach((point,i)=>{
+          const value=chart.data.datasets[0].data[i];
+          let y=point.y - 8;
+
+          // 위/아래 잘림 방지
+          if(y < chartArea.top + 10) y = chartArea.top + 12;
+          if(y > chartArea.bottom - 4) y = chartArea.bottom - 6;
+
           ctx.fillStyle='#333';
-          ctx.font='10px serif';
-          ctx.fillText(v+'kcal',p.x-14,p.y-8);
+          ctx.font='10px Nanum Gothic, sans-serif';
+          ctx.fillText(value+'kcal', point.x - 16, y);
         });
+        ctx.restore();
       }
     }]
   });
