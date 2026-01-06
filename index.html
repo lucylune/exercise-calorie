@@ -160,7 +160,6 @@
 
 <div class="container">
 
-  <!-- MAIN PAGE -->
   <div id="mainPage" class="page active">
 
     <div class="card">
@@ -207,7 +206,6 @@
 
   </div>
 
-  <!-- DETAIL PAGE -->
   <div id="detailPage" class="page">
     <button id="backBtn" class="small" style="margin-bottom:10px">←</button>
     <div class="card" id="detail"></div>
@@ -294,19 +292,17 @@ function render(){
   monthTotal.innerText=total+' kcal';
 
   const goal=6000;
-  const diff = total - goal;
-  const goalText = document.getElementById('goalText');
+  const diff=total-goal;
+  const goalText=document.getElementById('goalText');
 
-  if(diff < 0){
-    const remain = Math.abs(diff);
-    goalText.innerHTML = `${goal.toLocaleString()}kcal 달성까지 <span style="color:#FF6363">${remain.toLocaleString()}kcal</span> 남았어요!`;
-  } else if(diff > 0){
-    goalText.innerHTML = `짝짝짝! <span style="color:#01888C">${diff.toLocaleString()}kcal</span> 더 태웠어요 🎉`;
-  } else {
-    goalText.innerHTML = `${goal.toLocaleString()}kcal 목표 달성 🎯`;
+  if(diff<0){
+    const remain=Math.abs(diff);
+    goalText.innerHTML=`${goal.toLocaleString()}kcal 달성까지 <span style="color:#FF6363">${remain.toLocaleString()}kcal</span> 남았어요!`;
+  }else if(diff>0){
+    goalText.innerHTML=`짝짝짝! <span style="color:#01888C">${diff.toLocaleString()}kcal</span> 더 태웠어요 🎉`;
+  }else{
+    goalText.innerHTML=`${goal.toLocaleString()}kcal 목표 달성 🎯`;
   }
-  document.getElementById('goalText').innerText=
-    remain>0 ? `${goal.toLocaleString()}kcal 달성까지 ${remain.toLocaleString()}kcal 남았어요!` : `${goal.toLocaleString()}kcal 목표 달성 🎉`;
 
   summaryBar.innerHTML=''; legend.innerHTML='';
   Object.keys(map).forEach(k=>{
@@ -368,56 +364,13 @@ function drawLine(map){
   if(lineChart) lineChart.destroy();
 
   const values=Object.values(map);
-  const maxVal=Math.max(...values, 0);
+  const maxVal=Math.max(...values,0);
 
   lineChart=new Chart(ctx,{
     type:'line',
-    data:{
-      labels:Object.keys(map),
-      datasets:[{
-        data:values,
-        borderColor:'#27B2A5',
-        pointRadius:4,
-        pointBackgroundColor:'#FF6363',
-        tension:0.3
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      scales:{
-        x:{ display:true },
-        y:{
-          display:false,
-          suggestedMin:0,
-          suggestedMax:maxVal * 1.25
-        }
-      },
-      plugins:{ legend:{ display:false }, tooltip:{ enabled:false } },
-      animation:false
-    },
-    plugins:[{
-      afterDatasetsDraw(chart){
-        const ctx=chart.ctx;
-        const meta=chart.getDatasetMeta(0);
-        const chartArea=chart.chartArea;
-
-        ctx.save();
-        meta.data.forEach((point,i)=>{
-          const value=chart.data.datasets[0].data[i];
-          let y=point.y - 8;
-
-          // 위/아래 잘림 방지
-          if(y < chartArea.top + 10) y = chartArea.top + 12;
-          if(y > chartArea.bottom - 4) y = chartArea.bottom - 6;
-
-          ctx.fillStyle='#333';
-          ctx.font='10px Nanum Gothic, sans-serif';
-          ctx.fillText(value+'kcal', point.x - 16, y);
-        });
-        ctx.restore();
-      }
-    }]
+    data:{ labels:Object.keys(map), datasets:[{ data:values, borderColor:'#27B2A5', pointRadius:4, pointBackgroundColor:'#FF6363', tension:0.3 }] },
+    options:{ responsive:true, maintainAspectRatio:false, scales:{ x:{display:true}, y:{display:false, suggestedMin:0, suggestedMax:maxVal*1.25}}, plugins:{legend:{display:false}, tooltip:{enabled:false}}, animation:false },
+    plugins:[{ afterDatasetsDraw(chart){ const ctx=chart.ctx; const meta=chart.getDatasetMeta(0); const area=chart.chartArea; ctx.save(); meta.data.forEach((p,i)=>{ const v=chart.data.datasets[0].data[i]; let y=p.y-8; if(y<area.top+10) y=area.top+12; if(y>area.bottom-4) y=area.bottom-6; ctx.fillStyle='#333'; ctx.font='10px Nanum Gothic, sans-serif'; ctx.fillText(v+'kcal',p.x-16,y); }); ctx.restore(); }}]
   });
 }
 
