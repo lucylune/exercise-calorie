@@ -3,93 +3,187 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>운동 칼로리</title>
+  <title>운동 칼로리 관리</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: sans-serif; margin: 0; padding: 16px; background: #f7f7f7; }
-    .card { background: white; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
-    h1, h2 { margin: 8px 0; }
-    input, select, button {
-      width: 100%; padding: 10px; margin-top: 6px; font-size: 16px;
-    }
+    h1 { text-align: center; }
+    .card { background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+    input, select, button { width: 100%; padding: 10px; margin-top: 6px; font-size: 16px; }
     button { background: #2563eb; color: white; border: none; border-radius: 6px; }
     .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .day { background: #fff; border-radius: 6px; padding: 6px; text-align: center; font-size: 12px; }
+    .day { border: 1px solid #ddd; border-radius: 6px; padding: 4px; text-align: center; font-size: 12px; }
     .kcal { color: #2563eb; font-size: 11px; }
   </style>
 </head>
 <body>
 
-<h1 style="text-align:center">🏃 운동 칼로리</h1>
+<h1>🏃 운동 칼로리 관리</h1>
 
 <div class="card">
-  <h2>이번 달 총 칼로리</h2>
-  <h1 id="total">0 kcal</h1>
+  <h2>이번 달 총 운동 칼로리</h2>
+  <h1 id="monthTotal">0 kcal</h1>
+  <canvas id="monthStackChart" style="margin-top:12px"></canvas>
 </div>
 
 <div class="card">
-  <h2>운동 기록</h2>
-  <input type="datetime-local" id="date">
+  <h2>운동 기록하기</h2>
+  <input type="date" id="date" />
   <select id="exercise">
     <option value="">운동 선택</option>
     <option>수영</option>
     <option>달리기</option>
     <option>런닝머신</option>
     <option>걷기</option>
-    <option>웨이트</option>
+    <option>웨이트 트레이닝</option>
   </select>
-  <input type="number" id="calorie" placeholder="칼로리">
-  <button onclick="add()">추가</button>
+  <input type="number" id="calorie" placeholder="소모 칼로리 (kcal)" />
+  <input type="number" id="time" placeholder="운동 시간 (분)" />
+  <button onclick="addRecord()">기록 추가</button>
 </div>
 
 <div class="card">
-  <h2>📅 이번 달 기록</h2>
+  <h2>📅 캘린더로 칼로리 보기</h2>
   <div class="calendar" id="calendar"></div>
 </div>
 
+<div class="card" id="detailCard" style="display:none">
+  <h2>📋 선택한 날짜 운동 상세</h2>
+  <ul id="detailList"></ul>
+</div>
+</div>
+
+<div class="card">
+  <h2>📊 운동 종목별 칼로리</h2>
+  <canvas id="exerciseChart"></canvas>
+</div>
+
 <script>
-  const records = JSON.parse(localStorage.getItem("records") || "[]");
+  const records = JSON.parse(localStorage.getItem("exerciseRecords") || "[]");
 
-  function save() {
-    localStorage.setItem("records", JSON.stringify(records));
-    render();
-  }
-
-  function add() {
+  function addRecord() {
     const date = document.getElementById("date").value;
     const exercise = document.getElementById("exercise").value;
     const calorie = Number(document.getElementById("calorie").value);
-    if (!date || !exercise || !calorie) return;
-    records.push({ date, exercise, calorie });
-    save();
+    const time = Number(document.getElementById("time").value);
+
+    if (!date || !exercise || !calorie || !time) return;
+
+    records.push({ date, exercise, calorie, time });
+    localStorage.setItem("exerciseRecords", JSON.stringify(records));
+    render();
+
+  function drawMonthStack(data) {
+    const ctx = document.getElementById('monthStackChart');
+    if (monthStackChart) monthStackChart.destroy();
+
+    const colors = {
+      '수영': '#3b82f6',
+      '달리기': '#22c55e',
+      '런닝머신': '#f97316',
+      '걷기': '#a855f7',
+      '웨이트 트레이닝': '#ef4444'
+    };
+
+    const datasets = Object.keys(data).map(ex => ({
+      label: ex,
+      data: [data[ex]],
+      backgroundColor: colors[ex] || '#999'
+    }));
+
+    monthStackChart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: ['이번 달'], datasets },
+      options: {
+        indexAxis: 'y',
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+          x: { stacked: true, beginAtZero: true },
+          y: { stacked: true }
+        }
+      }
+    });
+  }
+
+  function showDetail(date) {
+    const list = document.getElementById("detailList");
+    const card = document.getElementById("detailCard");
+    list.innerHTML = "";
+
+    const filtered = records.filter(r => r.date === date);
+    if (filtered.length === 0) {
+      list.innerHTML = "<li>운동 기록 없음</li>";
+    } else {
+      filtered.forEach(r => {
+        list.innerHTML += `<li>🏃 ${r.exercise} / ${r.time}분 / ${r.calorie}kcal</li>`;
+      });
+    }
+
+    card.style.display = "block";
+    card.scrollIntoView({ behavior: "smooth" });
+  }
+
     document.getElementById("calorie").value = "";
+    document.getElementById("time").value = "";
   }
 
   function render() {
     const now = new Date();
-    const month = now.toISOString().slice(0,7);
-    let total = 0;
-    const map = {};
+    const monthKey = now.toISOString().slice(0,7);
+    let monthTotal = 0;
+    const calendarMap = {};
+    const exerciseMap = {};
 
     records.forEach(r => {
-      if (r.date.startsWith(month)) total += r.calorie;
-      const d = r.date.slice(0,10);
-      map[d] = (map[d] || 0) + r.calorie;
+      if (r.date.startsWith(monthKey)) monthTotal += r.calorie;
+      calendarMap[r.date] = (calendarMap[r.date] || 0) + r.calorie;
+      exerciseMap[r.exercise] = (exerciseMap[r.exercise] || 0) + r.calorie;
     });
 
-    document.getElementById("total").innerText = total + " kcal";
+    document.getElementById("monthTotal").innerText = monthTotal + " kcal";
 
-    const days = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
     const cal = document.getElementById("calendar");
     cal.innerHTML = "";
 
-    for (let i=1;i<=days;i++) {
-      const d = `${month}-${String(i).padStart(2,"0")}`;
+    for (let i=1;i<=daysInMonth;i++) {
+      const d = `${monthKey}-${String(i).padStart(2,"0")}`;
       cal.innerHTML += `
-        <div class="day">
-          ${i}<br>
-          <span class="kcal">${map[d] ? map[d]+"kcal" : ""}</span>
+        <div class="day" onclick="showDetail('${d}')">
+          ${i}<br />
+          <span class="kcal">${calendarMap[d] ? calendarMap[d] + "kcal" : ""}</span>
         </div>`;
     }
+
+    drawChart(exerciseMap);
+    drawMonthStack(exerciseMap);
+  }
+
+  let chart;
+let monthStackChart;
+  function drawChart(data) {
+    const ctx = document.getElementById('exerciseChart');
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(data),
+        datasets: [{
+          label: '칼로리 (kcal)',
+          data: Object.values(data)
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
   }
 
   render();
