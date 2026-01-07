@@ -6,7 +6,6 @@
   <title>🏃‍♂️ Burnning 🔥</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
@@ -18,223 +17,60 @@
       --bg:#D4F0ED;
       --sub:#FFC1C1;
     }
-
     *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family:'Nanum Gothic', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background:var(--bg);
-      color:#222;
-    }
-
-    header{
-      padding:14px;
-      background:var(--main);
-      color:white;
-      text-align:center;
-      font-size:18px;
-      font-weight:700;
-    }
-
+    body{ margin:0; font-family:'Nanum Gothic',system-ui,sans-serif; background:var(--bg); }
+    header{ padding:14px; background:var(--main); color:white; text-align:center; font-weight:700; }
     .container{ padding:12px; }
-
-    .card{
-      background:white;
-      border-radius:16px;
-      padding:14px;
-      margin-bottom:14px;
-      box-shadow:0 6px 14px rgba(0,0,0,0.06);
-    }
-
+    .card{ background:white; border-radius:16px; padding:14px; margin-bottom:14px; box-shadow:0 6px 14px rgba(0,0,0,.06); }
     h1{ margin:4px 0 8px; font-size:22px; }
     h2{ margin:0 0 8px; font-size:15px; }
-
-    button{
-      width:100%;
-      padding:12px;
-      border:none;
-      border-radius:12px;
-      background:var(--main);
-      color:white;
-      font-size:15px;
-      font-weight:700;
-      cursor:pointer;
-    }
-
-    button.small{
-      width:36px;
-      height:36px;
-      padding:0;
-      font-size:14px;
-    }
-
-    input, select{
-      width:100%;
-      padding:10px;
-      margin-top:6px;
-      font-size:15px;
-      border-radius:10px;
-      border:1px solid #ddd;
-    }
-
-    .summary-bar{
-      display:flex;
-      height:10px;
-      border-radius:6px;
-      overflow:hidden;
-      margin-top:6px;
-    }
-
-    .legend{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px 10px;
-      margin-top:8px;
-      font-size:12px;
-    }
-
-    .legend span{ display:flex; align-items:center; gap:4px; }
-
-    .dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      display:inline-block;
-    }
-
-    .calendar-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:8px;
-    }
-
-    .calendar{
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
-      gap:6px;
-    }
-
-    .day{
-      border:1px solid #ddd;
-      border-radius:10px;
-      padding:6px 2px;
-      font-size:12px;
-      text-align:center;
-      cursor:pointer;
-      background:#fafafa;
-    }
-
-    .day:hover{ background:var(--bg); }
-
+    .summary-bar{ display:flex; height:10px; border-radius:6px; overflow:hidden; margin-top:6px; }
+    .legend{ display:flex; flex-wrap:wrap; gap:6px 10px; margin-top:8px; font-size:12px; }
+    .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+    .calendar{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+    .day{ border:1px solid #ddd; border-radius:10px; padding:6px 2px; font-size:12px; text-align:center; }
     .kcal{ font-size:11px; color:var(--main); }
-
     canvas{ max-height:110px; }
-
-    .detail-item{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:8px;
-      font-size:14px;
-    }
-
-    .delete{
-      background:var(--accent);
-      padding:4px 8px;
-      border-radius:6px;
-      font-size:11px;
-      color:white;
-      border:none;
-      width:auto;
-    }
-
-    .page{ display:none; }
-    .page.active{ display:block; }
-
   </style>
 </head>
 <body>
-
-<header id="headerTitle">🏃‍♂️ Burnning 🔥</header>
-
+<header>🏃‍♂️ Burnning 🔥</header>
 <div class="container">
 
-  <div id="mainPage" class="page active">
-
-    <div class="card">
-      <h2 id="monthTitle"></h2>
-      <h1 id="monthTotal">0 kcal</h1>
-      <div class="summary-bar" id="summaryBar"></div>
-      <div class="legend" id="legend"></div>
-      <p id="goalText" style="margin-top:14px;font-size:16px;font-weight:700;color:#7F7F7F"></p>
-    </div>
-
-    <div class="card">
-      <button id="toggleBtn">운동 기록하기</button>
-      <div id="form" style="display:none; margin-top:10px;">
-        <input type="date" id="date" />
-        <select id="exercise">
-          <option value="">운동 선택</option>
-          <option>수영</option>
-          <option>달리기</option>
-          <option>런닝머신</option>
-          <option>걷기</option>
-          <option>웨이트 트레이닝</option>
-        </select>
-        <input type="number" id="calorie" placeholder="칼로리 (kcal)" />
-        <input type="number" id="time" placeholder="운동 시간 (분)" />
-        <button id="addBtn" style="margin-top:8px">기록 추가</button>
-        <p id="msg" style="color:var(--accent)"></p>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>날짜별로 보기</h2>
-      <div class="calendar-header">
-        <button class="small" id="prevMonth">◀</button>
-        <strong id="calMonth"></strong>
-        <button class="small" id="nextMonth">▶</button>
-      </div>
-      <div class="calendar" id="calendar"></div>
-    </div>
-
-    <div class="card">
-      <h2>종목별로 보기</h2>
-      <canvas id="lineChart"></canvas>
-    </div>
-
+  <div class="card">
+    <h2 id="monthTitle"></h2>
+    <h1 id="monthTotal"></h1>
+    <div class="summary-bar" id="summaryBar"></div>
+    <div class="legend" id="legend"></div>
+    <p id="goalText" style="margin-top:14px;font-size:16px;font-weight:700;color:#7F7F7F"></p>
   </div>
 
-  <div id="detailPage" class="page">
-    <button id="backBtn" class="small" style="margin-bottom:10px">←</button>
-    <div class="card" id="detail"></div>
+  <div class="card">
+    <h2>날짜별로 보기</h2>
+    <div class="calendar" id="calendar"></div>
+  </div>
+
+  <div class="card">
+    <h2>종목별로 보기</h2>
+    <canvas id="lineChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>목표 달성 현황</h2>
+    <div id="goalStatus" style="display:flex;justify-content:space-between;text-align:center"></div>
   </div>
 
 </div>
 
 <script>
-const mainPage=document.getElementById('mainPage');
-const detailPage=document.getElementById('detailPage');
-const headerTitle=document.getElementById('headerTitle');
-
-const form=document.getElementById('form');
-const toggleBtn=document.getElementById('toggleBtn');
-const addBtn=document.getElementById('addBtn');
-const dateInput=document.getElementById('date');
-const exerciseInput=document.getElementById('exercise');
-const calorieInput=document.getElementById('calorie');
-const timeInput=document.getElementById('time');
-const msg=document.getElementById('msg');
-
+const records = JSON.parse(localStorage.getItem('exerciseRecords')||'[]');
 const monthTitle=document.getElementById('monthTitle');
 const monthTotal=document.getElementById('monthTotal');
 const summaryBar=document.getElementById('summaryBar');
 const legend=document.getElementById('legend');
 const calendar=document.getElementById('calendar');
-const calMonth=document.getElementById('calMonth');
-const detail=document.getElementById('detail');
-const backBtn=document.getElementById('backBtn');
+const goalText=document.getElementById('goalText');
+const goalStatus=document.getElementById('goalStatus');
 
 const colors={
   수영:'#27B2A5',
@@ -244,43 +80,40 @@ const colors={
   '웨이트 트레이닝':'#f59e0b'
 };
 
-let records=JSON.parse(localStorage.getItem('exerciseRecords')||'[]');
 let viewDate=new Date();
-let lineChart;
 
-toggleBtn.onclick=()=>{
-  form.style.display=form.style.display==='none'?'block':'none';
-};
+function renderGoalStatus(){
+  goalStatus.innerHTML='';
+  const now=new Date();
+  const nowKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
-addBtn.onclick=()=>{
-  if(!dateInput.value||!exerciseInput.value||!calorieInput.value||!timeInput.value){
-    msg.innerText='모두 입력해주세요'; return;
+  for(let m=0;m<4;m++){
+    const key=`2026-${String(m+1).padStart(2,'0')}`;
+
+    const total=records
+      .filter(r=>r.date.startsWith(key))
+      .reduce((a,b)=>a+b.calorie,0);
+
+    let icon=''; // 미래 월은 공란
+    if(key < nowKey){
+      icon = total>=6000 ? '✅' : '❌';
+    }
+
+    const item=document.createElement('div');
+    item.innerHTML=`
+      <div style="font-size:13px;color:#555">${m+1}월</div>
+      <div style="font-size:16px">${icon}</div>
+    `;
+    goalStatus.appendChild(item);
   }
-  records.push({
-    date:dateInput.value,
-    exercise:exerciseInput.value,
-    calorie:+calorieInput.value,
-    time:+timeInput.value
-  });
-  localStorage.setItem('exerciseRecords',JSON.stringify(records));
-  msg.innerText='';
-  form.style.display='none';
-  render();
-};
-
-prevMonth.onclick=()=>{ viewDate.setMonth(viewDate.getMonth()-1); render(); };
-nextMonth.onclick=()=>{ viewDate.setMonth(viewDate.getMonth()+1); render(); };
+}
 
 function render(){
   const y=viewDate.getFullYear();
   const m=viewDate.getMonth();
   const key=`${y}-${String(m+1).padStart(2,'0')}`;
 
-  monthTitle.innerText=`${m+1}월 총 운동 칼로리`;
-  calMonth.innerText=`${y}.${m+1}`;
-
   let total=0,map={},dayMap={};
-
   records.forEach(r=>{
     if(r.date.startsWith(key)){
       total+=r.calorie;
@@ -289,22 +122,18 @@ function render(){
     }
   });
 
+  monthTitle.innerText=`${m+1}월 총 운동 칼로리`;
   monthTotal.innerText=total+' kcal';
 
-  const goal=6000;
-  const diff=total-goal;
-  const goalText=document.getElementById('goalText');
-
+  const diff=total-6000;
   if(diff<0){
-    const remain=Math.abs(diff);
-    goalText.innerHTML=`${goal.toLocaleString()}kcal 달성까지 <span style="color:#FF6363">${remain.toLocaleString()}kcal</span> 남았어요!`;
-  }else if(diff>0){
-    goalText.innerHTML=`짝짝짝! <span style="color:#01888C">${diff.toLocaleString()}kcal</span> 더 태웠어요 🎉`;
-  }else{
-    goalText.innerHTML=`${goal.toLocaleString()}kcal 목표 달성 🎯`;
+    goalText.innerHTML=`6,000kcal 달성까지 <span style="color:#FF6363">${Math.abs(diff)}kcal</span> 남았어요!`;
+  } else {
+    goalText.innerHTML=`짝짝짝! <span style="color:#01888C">${diff}kcal</span> 더 태웠어요 🎉`;
   }
 
-  summaryBar.innerHTML=''; legend.innerHTML='';
+  summaryBar.innerHTML='';
+  legend.innerHTML='';
   Object.keys(map).forEach(k=>{
     const bar=document.createElement('div');
     bar.style.width=total?(map[k]/total*100)+'%':'0%';
@@ -317,61 +146,10 @@ function render(){
   const days=new Date(y,m+1,0).getDate();
   for(let i=1;i<=days;i++){
     const d=`${key}-${String(i).padStart(2,'0')}`;
-    const div=document.createElement('div');
-    div.className='day';
-    div.innerHTML=`${i}<br><span class="kcal">${dayMap[d]||''}</span>`;
-    div.onclick=()=>openDetail(d);
-    calendar.appendChild(div);
+    calendar.innerHTML+=`<div class="day">${i}<br><span class="kcal">${dayMap[d]||''}</span></div>`;
   }
 
-  drawLine(map);
-}
-
-function openDetail(date){
-  mainPage.classList.remove('active');
-  detailPage.classList.add('active');
-  headerTitle.innerText='운동 상세';
-
-  detail.innerHTML=`<h2>${date}</h2>`;
-  records.map((r,i)=>({...r,i}))
-    .filter(r=>r.date===date)
-    .forEach(r=>{
-      const div=document.createElement('div');
-      div.className='detail-item';
-      div.innerHTML=`${r.exercise} ${r.calorie}kcal`;
-      const del=document.createElement('button');
-      del.className='delete'; del.innerText='삭제';
-      del.onclick=()=>removeRecord(r.i);
-      div.appendChild(del);
-      detail.appendChild(div);
-    });
-}
-
-backBtn.onclick=()=>{
-  detailPage.classList.remove('active');
-  mainPage.classList.add('active');
-  headerTitle.innerText='🏃‍♂️ Burnning 🔥';
-};
-
-function removeRecord(i){
-  records.splice(i,1);
-  localStorage.setItem('exerciseRecords',JSON.stringify(records));
-  backBtn.click(); render();
-}
-
-function drawLine(map){
-  const ctx=document.getElementById('lineChart');
-  if(lineChart) lineChart.destroy();
-
-  const values=Object.values(map);
-  const maxVal=Math.max(...values,0);
-
-  lineChart=new Chart(ctx,{
-    type:'line',
-    data:{ labels:Object.keys(map), datasets:[{ data:values, borderColor:'#27B2A5', pointRadius:4, pointBackgroundColor:'#FF6363', tension:0.3 }] },
-    options:{ responsive:true, maintainAspectRatio:false, scales:{ x:{display:true}, y:{display:false, suggestedMin:0, suggestedMax:maxVal*1.25}}, plugins:{legend:{display:false}, tooltip:{enabled:false}}, animation:false },
-    plugins:[{ afterDatasetsDraw(chart){ const ctx=chart.ctx; const meta=chart.getDatasetMeta(0); const area=chart.chartArea; ctx.save(); meta.data.forEach((p,i)=>{ const v=chart.data.datasets[0].data[i]; let y=p.y-8; if(y<area.top+10) y=area.top+12; if(y>area.bottom-4) y=area.bottom-6; ctx.fillStyle='#333'; ctx.font='10px Nanum Gothic, sans-serif'; ctx.fillText(v+'kcal',p.x-16,y); }); ctx.restore(); }}]
-  });
+  renderGoalStatus();
 }
 
 render();
