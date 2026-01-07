@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🏃‍♂️ Burning 🔥</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
@@ -18,77 +15,66 @@
       --sub:#FFC1C1;
       --text:#7F7F7F;
     }
-    *{ box-sizing:border-box; }
-    body{ margin:0; font-family:'Nanum Gothic',system-ui,sans-serif; background:var(--bg); color:var(--text); }
-    header{ padding:14px; background:var(--main); color:white; text-align:center; font-weight:700; font-size:18px; }
-    .container{ padding:12px; }
-    .card{ background:white; border-radius:16px; padding:14px; margin-bottom:14px; box-shadow:0 6px 14px rgba(0,0,0,.06); }
-    h1{ margin:4px 0 8px; font-size:22px; color:#333; }
-    h2{ margin:0 0 10px; font-size:15px; color:#333; }
-
-    .summary-bar{ display:flex; height:10px; border-radius:6px; overflow:hidden; margin-top:6px; }
-    .legend{ display:flex; flex-wrap:wrap; gap:6px 10px; margin-top:8px; font-size:12px; }
-    .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
-
-    button{ background:var(--main); color:white; border:none; border-radius:12px; padding:12px; font-size:14px; width:100%; }
-    button.small{ width:auto; padding:6px 10px; font-size:12px; }
-
-    .form{ display:none; margin-top:10px; }
-    .form input,.form select{ width:100%; padding:10px; margin-bottom:8px; border-radius:10px; border:1px solid #ddd; }
-
-    .calendar{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-    .day{ border:1px solid #ddd; border-radius:10px; padding:6px 2px; font-size:12px; text-align:center; }
-    .kcal{ font-size:11px; color:var(--main); }
-
-    canvas{ max-height:110px; }
-
-    .goal-status{ display:flex; justify-content:space-between; text-align:center; }
-    .goal-item{ flex:1; }
-    .goal-item div:first-child{ font-size:13px; }
-    .goal-item div:last-child{ font-size:16px; }
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text);}    
+    header{padding:14px;background:var(--main);color:#fff;text-align:center;font-weight:700;}
+    .container{padding:12px;}
+    .card{background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:0 6px 14px rgba(0,0,0,.06);}    
+    h1{margin:4px 0;font-size:22px;color:#333;}
+    h2{margin:0 0 10px;font-size:15px;color:#333;}
+    button{background:var(--main);color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px;}
+    button.small{padding:6px 10px;font-size:12px;width:auto;}
+    .summary-bar{display:flex;height:10px;border-radius:6px;overflow:hidden;margin-top:6px;}
+    .legend{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:8px;font-size:12px;}
+    .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+    .day{border:1px solid #ddd;border-radius:10px;padding:6px 2px;font-size:12px;text-align:center;cursor:pointer;}
+    .kcal{font-size:11px;color:var(--main);}    
+    .nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+    .goal-status{display:flex;justify-content:space-between;text-align:center;}
+    .goal-item{flex:1;}
+    .hidden{display:none;}
   </style>
 </head>
 <body>
 <header>🏃‍♂️ Burning 🔥</header>
 <div class="container">
 
-  <!-- 월 요약 -->
-  <div class="card">
+  <!-- 메인 -->
+  <div class="card" id="mainPage">
     <h2 id="monthTitle"></h2>
     <h1 id="monthTotal"></h1>
     <div class="summary-bar" id="summaryBar"></div>
     <div class="legend" id="legend"></div>
     <p id="goalText" style="margin-top:14px;font-size:16px;font-weight:700"></p>
-  </div>
 
-  <!-- 운동 기록 -->
-  <div class="card">
+    <!-- 기록 -->
     <button onclick="toggleForm()">운동 기록하기</button>
-    <div class="form" id="form">
-      <input type="date" id="date" />
+    <div id="form" class="hidden">
+      <input type="date" id="date"><br>
       <select id="exercise">
-        <option>수영</option>
-        <option>달리기</option>
-        <option>런닝머신</option>
-        <option>걷기</option>
-        <option>웨이트 트레이닝</option>
-      </select>
-      <input type="number" id="calorie" placeholder="칼로리 (kcal)" />
-      <input type="number" id="time" placeholder="운동 시간 (분)" />
+        <option>수영</option><option>달리기</option><option>런닝머신</option><option>걷기</option><option>웨이트 트레이닝</option>
+      </select><br>
+      <input type="number" id="calorie" placeholder="칼로리 (kcal)"><br>
+      <input type="number" id="time" placeholder="운동 시간 (분)"><br>
       <button onclick="addRecord()">기록 추가</button>
     </div>
   </div>
 
   <!-- 날짜별 -->
-  <div class="card">
-    <h2>날짜별로 보기</h2>
+  <div class="card" id="calendarPage">
+    <div class="nav">
+      <button class="small" onclick="changeMonth(-1)">◀</button>
+      <h2>날짜별로 보기</h2>
+      <button class="small" onclick="changeMonth(1)">▶</button>
+    </div>
     <div class="calendar" id="calendar"></div>
   </div>
 
   <!-- 종목별 -->
   <div class="card">
     <h2>종목별로 보기</h2>
-    <canvas id="lineChart"></canvas>
+    <canvas id="lineChart" height="120"></canvas>
   </div>
 
   <!-- 목표 -->
@@ -97,106 +83,77 @@
     <div class="goal-status" id="goalStatus"></div>
   </div>
 
+  <!-- 상세 -->
+  <div class="card hidden" id="detailPage">
+    <button class="small" onclick="backToMain()">← 돌아가기</button>
+    <h2 id="detailTitle"></h2>
+    <div id="detailList"></div>
+  </div>
+
 </div>
 
 <script>
-const records = JSON.parse(localStorage.getItem('exerciseRecords')||'[]');
-const monthTitle=document.getElementById('monthTitle');
-const monthTotal=document.getElementById('monthTotal');
-const summaryBar=document.getElementById('summaryBar');
-const legend=document.getElementById('legend');
-const calendar=document.getElementById('calendar');
-const goalText=document.getElementById('goalText');
-const goalStatus=document.getElementById('goalStatus');
-const form=document.getElementById('form');
+const records=JSON.parse(localStorage.getItem('exerciseRecords')||'[]');
+const colors={수영:'#27B2A5',달리기:'#FF6363',런닝머신:'#D4F0ED',걷기:'#FFC1C1','웨이트 트레이닝':'#f59e0b'};
+let viewDate=new Date();let chart;
 
-const colors={
-  수영:'#27B2A5',
-  달리기:'#FF6363',
-  런닝머신:'#D4F0ED',
-  걷기:'#FFC1C1',
-  '웨이트 트레이닝':'#f59e0b'
-};
-
-let viewDate=new Date();
-let chart;
-
-function toggleForm(){
-  form.style.display=form.style.display==='block'?'none':'block';
-}
+function toggleForm(){document.getElementById('form').classList.toggle('hidden');}
 
 function addRecord(){
-  const d=document.getElementById('date').value;
-  const e=document.getElementById('exercise').value;
-  const c=Number(document.getElementById('calorie').value);
-  const t=Number(document.getElementById('time').value);
-  if(!d||!e||!c||!t) return alert('모든 항목을 입력해주세요');
+  const d=date.value,e=exercise.value,c=+calorie.value,t=+time.value;
+  if(!d||!c||!t) return alert('모두 입력하세요');
   records.push({date:d,exercise:e,calorie:c,time:t});
   localStorage.setItem('exerciseRecords',JSON.stringify(records));
-  form.reset?.();
   render();
 }
 
-function renderGoalStatus(){
-  goalStatus.innerHTML='';
-  const now=new Date();
-  const nowKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  for(let m=0;m<4;m++){
-    const key=`${now.getFullYear()}-${String(m+1).padStart(2,'0')}`;
-    const total=records.filter(r=>r.date.startsWith(key)).reduce((a,b)=>a+b.calorie,0);
-    let icon='';
-    if(key===nowKey) icon='⏳';
-    else if(key<nowKey) icon=total>=6000?'✅':'❌';
-    const item=document.createElement('div');
-    item.className='goal-item';
-    item.innerHTML=`<div>${m+1}월</div><div>${icon}</div>`;
-    goalStatus.appendChild(item);
-  }
+function changeMonth(diff){viewDate.setMonth(viewDate.getMonth()+diff);render();}
+
+function openDetail(date){
+  document.getElementById('mainPage').classList.add('hidden');
+  document.getElementById('calendarPage').classList.add('hidden');
+  document.getElementById('detailPage').classList.remove('hidden');
+  detailTitle.innerText=date;
+  detailList.innerHTML='';
+  records.filter(r=>r.date===date).forEach((r,i)=>{
+    const div=document.createElement('div');
+    div.innerHTML=`${r.exercise} ${r.calorie}kcal <button class="small" onclick="deleteRecord('${date}',${i})">삭제</button>`;
+    detailList.appendChild(div);
+  });
+}
+
+function deleteRecord(date,index){
+  const list=records.filter(r=>r.date===date);
+  const target=list[index];
+  const idx=records.indexOf(target);
+  records.splice(idx,1);
+  localStorage.setItem('exerciseRecords',JSON.stringify(records));
+  openDetail(date);render();
+}
+
+function backToMain(){
+  detailPage.classList.add('hidden');
+  mainPage.classList.remove('hidden');
+  calendarPage.classList.remove('hidden');
 }
 
 function render(){
-  const y=viewDate.getFullYear();
-  const m=viewDate.getMonth();
+  const y=viewDate.getFullYear(),m=viewDate.getMonth();
   const key=`${y}-${String(m+1).padStart(2,'0')}`;
   let total=0,map={},dayMap={};
-  records.forEach(r=>{
-    if(r.date.startsWith(key)){
-      total+=r.calorie;
-      map[r.exercise]=(map[r.exercise]||0)+r.calorie;
-      dayMap[r.date]=(dayMap[r.date]||0)+r.calorie;
-    }
-  });
-  monthTitle.innerText=`${m+1}월 총 운동 칼로리`;
-  monthTotal.innerText=total+' kcal';
+  records.forEach(r=>{if(r.date.startsWith(key)){total+=r.calorie;map[r.exercise]=(map[r.exercise]||0)+r.calorie;dayMap[r.date]=(dayMap[r.date]||0)+r.calorie;}});
+  monthTitle.innerText=`${m+1}월 총 운동 칼로리`;monthTotal.innerText=total+' kcal';
   const diff=6000-total;
-  goalText.innerHTML=diff>0?
-    `6,000kcal 달성까지 <span style="color:var(--accent)">${diff}kcal</span> 남았어요!`:
-    `짝짝짝! <span style="color:#01888C">${Math.abs(diff)}kcal</span> 더 태웠어요 🎉`;
+  goalText.innerHTML=diff>0?`6,000kcal 달성까지 <span style='color:var(--accent)'>${diff}kcal</span> 남았어요!`:`짝짝짝! <span style='color:#01888C'>${Math.abs(diff)}kcal</span> 더 태웠어요 🎉`;
 
-  summaryBar.innerHTML=''; legend.innerHTML='';
-  Object.keys(map).forEach(k=>{
-    const bar=document.createElement('div');
-    bar.style.width=total?(map[k]/total*100)+'%':'0%';
-    bar.style.background=colors[k];
-    summaryBar.appendChild(bar);
-    legend.innerHTML+=`<span><i class="dot" style="background:${colors[k]}"></i>${k} ${map[k]}kcal</span>`;
-  });
+  summaryBar.innerHTML='';legend.innerHTML='';
+  Object.keys(map).forEach(k=>{const b=document.createElement('div');b.style.width=(map[k]/total*100||0)+'%';b.style.background=colors[k];summaryBar.appendChild(b);legend.innerHTML+=`<span><i class='dot' style='background:${colors[k]}'></i>${k} ${map[k]}kcal</span>`});
 
   if(chart) chart.destroy();
-  chart=new Chart(document.getElementById('lineChart'),{
-    type:'line',
-    data:{labels:Object.keys(map),datasets:[{data:Object.values(map),borderColor:'#27B2A5',tension:.4,pointRadius:4}]},
-    options:{plugins:{legend:{display:false}},scales:{x:{display:true},y:{display:false}}}
-  });
+  chart=new Chart(lineChart,{type:'line',data:{labels:Object.keys(map),datasets:[{data:Object.values(map),borderColor:'#27B2A5',pointRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{display:false}}}});
 
-  calendar.innerHTML='';
-  const days=new Date(y,m+1,0).getDate();
-  for(let i=1;i<=days;i++){
-    const d=`${key}-${String(i).padStart(2,'0')}`;
-    calendar.innerHTML+=`<div class="day">${i}<br><span class="kcal">${dayMap[d]||''}</span></div>`;
-  }
-
-  renderGoalStatus();
+  calendar.innerHTML='';const days=new Date(y,m+1,0).getDate();
+  for(let i=1;i<=days;i++){const d=`${key}-${String(i).padStart(2,'0')}`;calendar.innerHTML+=`<div class='day' onclick="openDetail('${d}')">${i}<br><span class='kcal'>${dayMap[d]||''}</span></div>`;}
 }
 
 render();
