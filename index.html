@@ -104,6 +104,17 @@
   </div>
 </div>
 
+<!-- 날짜 상세 모달 -->
+<div class="modal" id="detailModal">
+  <div class="modal-card">
+    <h2 id="detailTitle"></h2>
+    <div id="detailList"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" style="background:#ccc;color:#333" onclick="closeDetail()">닫기</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let records = JSON.parse(localStorage.getItem('exerciseRecords')||'[]');
 let viewDate=new Date();
@@ -166,11 +177,37 @@ function render(){
   const days=new Date(y,m+1,0).getDate();
   for(let i=1;i<=days;i++){
     const d=`${key}-${String(i).padStart(2,'0')}`;
-    calendar.innerHTML+=`<div class="day">${i}<br><span class="kcal">${dayMap[d]||''}</span></div>`;
+    const dayDiv=document.createElement('div');
+    dayDiv.className='day';
+    dayDiv.innerHTML=`${i}<br><span class="kcal">${dayMap[d]||''}</span>`;
+    dayDiv.onclick=()=>openDayDetail(d);
+    calendar.appendChild(dayDiv);
   }
 
   renderChart(map);
   renderGoalStatus();
+}
+
+function openDayDetail(date){
+  detailTitle.innerText=date+' 운동 기록';
+  detailList.innerHTML='';
+  const list=records.filter(r=>r.date===date);
+  if(!list.length){detailList.innerHTML='<p>기록 없음</p>';} 
+  list.forEach(r=>{
+    const div=document.createElement('div');
+    div.style.marginBottom='6px';
+    div.innerHTML=`${r.exercise} ${r.calorie}kcal <button style="margin-left:6px" onclick="deleteRecord(${r.id})">삭제</button>`;
+    detailList.appendChild(div);
+  });
+  detailModal.classList.add('active');
+}
+
+function closeDetail(){detailModal.classList.remove('active');}
+
+function deleteRecord(id){
+  if(!confirm('삭제할까요?')) return;
+  records=records.filter(r=>r.id!==id);
+  save();closeDetail();render();
 }
 
 function renderChart(map){
