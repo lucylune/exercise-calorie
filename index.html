@@ -16,48 +16,85 @@
       --accent:#FF6363;
       --bg:#D4F0ED;
       --sub:#FFC1C1;
+      --text:#7F7F7F;
     }
     *{ box-sizing:border-box; }
-    body{ margin:0; font-family:'Nanum Gothic',system-ui,sans-serif; background:var(--bg); }
-    header{ padding:14px; background:var(--main); color:white; text-align:center; font-weight:700; }
+    body{ margin:0; font-family:'Nanum Gothic',system-ui,sans-serif; background:var(--bg); color:var(--text); }
+    header{ padding:14px; background:var(--main); color:white; text-align:center; font-weight:700; font-size:18px; }
     .container{ padding:12px; }
     .card{ background:white; border-radius:16px; padding:14px; margin-bottom:14px; box-shadow:0 6px 14px rgba(0,0,0,.06); }
-    h1{ margin:4px 0 8px; font-size:22px; }
-    h2{ margin:0 0 8px; font-size:15px; }
+    h1{ margin:4px 0 8px; font-size:22px; color:#333; }
+    h2{ margin:0 0 10px; font-size:15px; color:#333; }
+
     .summary-bar{ display:flex; height:10px; border-radius:6px; overflow:hidden; margin-top:6px; }
     .legend{ display:flex; flex-wrap:wrap; gap:6px 10px; margin-top:8px; font-size:12px; }
     .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+
+    button{ background:var(--main); color:white; border:none; border-radius:12px; padding:12px; font-size:14px; width:100%; }
+    button.small{ width:auto; padding:6px 10px; font-size:12px; }
+
+    .form{ display:none; margin-top:10px; }
+    .form input,.form select{ width:100%; padding:10px; margin-bottom:8px; border-radius:10px; border:1px solid #ddd; }
+
     .calendar{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
     .day{ border:1px solid #ddd; border-radius:10px; padding:6px 2px; font-size:12px; text-align:center; }
     .kcal{ font-size:11px; color:var(--main); }
+
     canvas{ max-height:110px; }
+
+    .goal-status{ display:flex; justify-content:space-between; text-align:center; }
+    .goal-item{ flex:1; }
+    .goal-item div:first-child{ font-size:13px; }
+    .goal-item div:last-child{ font-size:16px; }
   </style>
 </head>
 <body>
 <header>🏃‍♂️ Burning 🔥</header>
 <div class="container">
 
+  <!-- 월 요약 -->
   <div class="card">
     <h2 id="monthTitle"></h2>
     <h1 id="monthTotal"></h1>
     <div class="summary-bar" id="summaryBar"></div>
     <div class="legend" id="legend"></div>
-    <p id="goalText" style="margin-top:14px;font-size:16px;font-weight:700;color:#7F7F7F"></p>
+    <p id="goalText" style="margin-top:14px;font-size:16px;font-weight:700"></p>
   </div>
 
+  <!-- 운동 기록 -->
+  <div class="card">
+    <button onclick="toggleForm()">운동 기록하기</button>
+    <div class="form" id="form">
+      <input type="date" id="date" />
+      <select id="exercise">
+        <option>수영</option>
+        <option>달리기</option>
+        <option>런닝머신</option>
+        <option>걷기</option>
+        <option>웨이트 트레이닝</option>
+      </select>
+      <input type="number" id="calorie" placeholder="칼로리 (kcal)" />
+      <input type="number" id="time" placeholder="운동 시간 (분)" />
+      <button onclick="addRecord()">기록 추가</button>
+    </div>
+  </div>
+
+  <!-- 날짜별 -->
   <div class="card">
     <h2>날짜별로 보기</h2>
     <div class="calendar" id="calendar"></div>
   </div>
 
+  <!-- 종목별 -->
   <div class="card">
     <h2>종목별로 보기</h2>
     <canvas id="lineChart"></canvas>
   </div>
 
+  <!-- 목표 -->
   <div class="card">
     <h2>목표 달성 현황</h2>
-    <div id="goalStatus" style="display:flex;justify-content:space-between;text-align:center"></div>
+    <div class="goal-status" id="goalStatus"></div>
   </div>
 
 </div>
@@ -71,6 +108,7 @@ const legend=document.getElementById('legend');
 const calendar=document.getElementById('calendar');
 const goalText=document.getElementById('goalText');
 const goalStatus=document.getElementById('goalStatus');
+const form=document.getElementById('form');
 
 const colors={
   수영:'#27B2A5',
@@ -81,42 +119,45 @@ const colors={
 };
 
 let viewDate=new Date();
+let chart;
+
+function toggleForm(){
+  form.style.display=form.style.display==='block'?'none':'block';
+}
+
+function addRecord(){
+  const d=document.getElementById('date').value;
+  const e=document.getElementById('exercise').value;
+  const c=Number(document.getElementById('calorie').value);
+  const t=Number(document.getElementById('time').value);
+  if(!d||!e||!c||!t) return alert('모든 항목을 입력해주세요');
+  records.push({date:d,exercise:e,calorie:c,time:t});
+  localStorage.setItem('exerciseRecords',JSON.stringify(records));
+  form.reset?.();
+  render();
+}
 
 function renderGoalStatus(){
   goalStatus.innerHTML='';
   const now=new Date();
   const nowKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-
   for(let m=0;m<4;m++){
-    const key=`2026-${String(m+1).padStart(2,'0')}`;
-
-    const total=records
-      .filter(r=>r.date.startsWith(key))
-      .reduce((a,b)=>a+b.calorie,0);
-
-    let icon=''; // 기본 공란
-    if(key === nowKey){
-      icon = '⏳'; // 진행중
-    } else if(key < nowKey){
-      icon = total>=6000 ? '✅' : '❌';
-    }
-
+    const key=`${now.getFullYear()}-${String(m+1).padStart(2,'0')}`;
+    const total=records.filter(r=>r.date.startsWith(key)).reduce((a,b)=>a+b.calorie,0);
+    let icon='';
+    if(key===nowKey) icon='⏳';
+    else if(key<nowKey) icon=total>=6000?'✅':'❌';
     const item=document.createElement('div');
-    item.innerHTML=`
-      <div style="font-size:13px;color:#555">${m+1}월</div>
-      <div style="font-size:16px">${icon}</div>
-    `;
+    item.className='goal-item';
+    item.innerHTML=`<div>${m+1}월</div><div>${icon}</div>`;
     goalStatus.appendChild(item);
   }
 }
-
-let chart;
 
 function render(){
   const y=viewDate.getFullYear();
   const m=viewDate.getMonth();
   const key=`${y}-${String(m+1).padStart(2,'0')}`;
-
   let total=0,map={},dayMap={};
   records.forEach(r=>{
     if(r.date.startsWith(key)){
@@ -125,19 +166,14 @@ function render(){
       dayMap[r.date]=(dayMap[r.date]||0)+r.calorie;
     }
   });
-
   monthTitle.innerText=`${m+1}월 총 운동 칼로리`;
   monthTotal.innerText=total+' kcal';
+  const diff=6000-total;
+  goalText.innerHTML=diff>0?
+    `6,000kcal 달성까지 <span style="color:var(--accent)">${diff}kcal</span> 남았어요!`:
+    `짝짝짝! <span style="color:#01888C">${Math.abs(diff)}kcal</span> 더 태웠어요 🎉`;
 
-  const diff=total-6000;
-  if(diff<0){
-    goalText.innerHTML=`6,000kcal 달성까지 <span style="color:#FF6363">${Math.abs(diff)}kcal</span> 남았어요!`;
-  } else {
-    goalText.innerHTML=`짝짝짝! <span style="color:#01888C">${diff}kcal</span> 더 태웠어요 🎉`;
-  }
-
-  summaryBar.innerHTML='';
-  legend.innerHTML='';
+  summaryBar.innerHTML=''; legend.innerHTML='';
   Object.keys(map).forEach(k=>{
     const bar=document.createElement('div');
     bar.style.width=total?(map[k]/total*100)+'%':'0%';
@@ -146,25 +182,11 @@ function render(){
     legend.innerHTML+=`<span><i class="dot" style="background:${colors[k]}"></i>${k} ${map[k]}kcal</span>`;
   });
 
-  // 📊 종목별 그래프 렌더링
-  const ctx=document.getElementById('lineChart');
   if(chart) chart.destroy();
-  chart=new Chart(ctx,{
+  chart=new Chart(document.getElementById('lineChart'),{
     type:'line',
-    data:{
-      labels:Object.keys(map),
-      datasets:[{
-        data:Object.values(map),
-        borderColor:'#27B2A5',
-        tension:.4,
-        fill:false,
-        pointRadius:4
-      }]
-    },
-    options:{
-      plugins:{legend:{display:false}},
-      scales:{x:{display:true},y:{display:false}}
-    }
+    data:{labels:Object.keys(map),datasets:[{data:Object.values(map),borderColor:'#27B2A5',tension:.4,pointRadius:4}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{display:true},y:{display:false}}}
   });
 
   calendar.innerHTML='';
