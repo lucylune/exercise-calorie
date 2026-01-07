@@ -94,8 +94,10 @@ function renderGoalStatus(){
       .filter(r=>r.date.startsWith(key))
       .reduce((a,b)=>a+b.calorie,0);
 
-    let icon=''; // 미래 월은 공란
-    if(key < nowKey){
+    let icon=''; // 기본 공란
+    if(key === nowKey){
+      icon = '⏳'; // 진행중
+    } else if(key < nowKey){
       icon = total>=6000 ? '✅' : '❌';
     }
 
