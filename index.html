@@ -6,140 +6,121 @@
   <title>🏃‍♂️ Burning 🔥</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
-
   <style>
     :root{
-      --main:#27B2A5;
-      --accent:#FF6363;
-      --bg:#D4F0ED;
-      --sub:#FFC1C1;
-      --text:#7F7F7F;
+      --main:#27B2A5; --accent:#FF6363; --bg:#D4F0ED; --sub:#FFC1C1; --text:#7F7F7F;
     }
-    *{box-sizing:border-box;}
-    body{margin:0;font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text);}    
-    header{padding:14px;background:var(--main);color:#fff;text-align:center;font-weight:700;}
-    .container{padding:12px;}
-    .card{background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:0 6px 14px rgba(0,0,0,.06);}    
-    h1{margin:4px 0;font-size:22px;color:#333;}
-    h2{margin:0 0 10px;font-size:15px;color:#333;}
-    button{background:var(--main);color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px;}
-    button.small{padding:6px 10px;font-size:12px;width:auto;}
-    .summary-bar{display:flex;height:10px;border-radius:6px;overflow:hidden;margin-top:6px;}
-    .legend{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:8px;font-size:12px;}
-    .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
-    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-    .day{border:1px solid #ddd;border-radius:10px;padding:6px 2px;font-size:12px;text-align:center;cursor:pointer;}
-    .kcal{font-size:11px;color:var(--main);}    
-    .nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-    .goal-status{display:flex;justify-content:space-between;text-align:center;}
-    .goal-item{flex:1;}
-    .hidden{display:none;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Nanum Gothic',sans-serif;background:var(--bg);color:var(--text)}
+    header{background:var(--main);color:#fff;text-align:center;padding:14px;font-weight:700}
+    .container{padding:12px}
+    .card{background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:0 6px 14px rgba(0,0,0,.06)}
+    h1{margin:6px 0;font-size:22px;color:#333}
+    h2{margin:0 0 10px;font-size:15px;color:#333}
+    button{background:var(--main);color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px}
+    button.small{padding:6px 10px;font-size:12px}
+    .summary-bar{display:flex;height:10px;border-radius:6px;overflow:hidden;margin-top:6px}
+    .legend{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:8px;font-size:12px}
+    .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .day{border:1px solid #ddd;border-radius:10px;padding:6px 2px;font-size:12px;text-align:center;cursor:pointer}
+    .kcal{font-size:11px;color:var(--main)}
+    .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .goal-status{display:flex;justify-content:space-between;text-align:center}
+    .goal-item{flex:1}
+    .hidden{display:none}
   </style>
 </head>
 <body>
 <header>🏃‍♂️ Burning 🔥</header>
 <div class="container">
 
-  <!-- 메인 -->
-  <div class="card" id="mainPage">
-    <h2 id="monthTitle"></h2>
-    <h1 id="monthTotal"></h1>
-    <div class="summary-bar" id="summaryBar"></div>
-    <div class="legend" id="legend"></div>
-    <p id="goalText" style="margin-top:14px;font-size:16px;font-weight:700"></p>
-
-    <!-- 기록 -->
-    <button onclick="toggleForm()">운동 기록하기</button>
-    <div id="form" class="hidden">
-      <input type="date" id="date"><br>
-      <select id="exercise">
-        <option>수영</option><option>달리기</option><option>런닝머신</option><option>걷기</option><option>웨이트 트레이닝</option>
-      </select><br>
-      <input type="number" id="calorie" placeholder="칼로리 (kcal)"><br>
-      <input type="number" id="time" placeholder="운동 시간 (분)"><br>
-      <button onclick="addRecord()">기록 추가</button>
-    </div>
+<!-- 메인 요약 -->
+<div class="card" id="mainPage">
+  <h2 id="monthTitle"></h2>
+  <h1 id="monthTotal"></h1>
+  <div class="summary-bar" id="summaryBar"></div>
+  <div class="legend" id="legend"></div>
+  <p id="goalText" style="margin-top:14px;font-size:16px;font-weight:700"></p>
+  <button onclick="toggleForm()">운동 기록하기</button>
+  <div id="form" class="hidden">
+    <input type="date" id="date"><br>
+    <select id="exercise">
+      <option>수영</option><option>달리기</option><option>런닝머신</option><option>걷기</option><option>웨이트 트레이닝</option>
+    </select><br>
+    <input type="number" id="calorie" placeholder="칼로리 (kcal)"><br>
+    <input type="number" id="time" placeholder="운동 시간 (분)"><br>
+    <button onclick="addRecord()">기록 추가</button>
   </div>
+</div>
 
-  <!-- 날짜별 -->
-  <div class="card" id="calendarPage">
-    <div class="nav">
-      <button class="small" onclick="changeMonth(-1)">◀</button>
-      <h2>날짜별로 보기</h2>
-      <button class="small" onclick="changeMonth(1)">▶</button>
-    </div>
-    <div class="calendar" id="calendar"></div>
+<!-- 날짜별로 보기 -->
+<div class="card" id="calendarPage">
+  <h2>날짜별로 보기</h2>
+  <div class="nav">
+    <button class="small" onclick="changeMonth(-1)">◀</button>
+    <div id="calendarMonth"></div>
+    <button class="small" onclick="changeMonth(1)">▶</button>
   </div>
+  <div class="calendar" id="calendar"></div>
+</div>
 
-  <!-- 종목별 -->
-  <div class="card">
-    <h2>종목별로 보기</h2>
-    <canvas id="lineChart" height="120"></canvas>
-  </div>
+<!-- 종목별 -->
+<div class="card" id="chartPage">
+  <h2>종목별로 보기</h2>
+  <canvas id="lineChart" height="120"></canvas>
+</div>
 
-  <!-- 목표 -->
-  <div class="card">
-    <h2>목표 달성 현황</h2>
-    <div class="goal-status" id="goalStatus"></div>
-  </div>
+<!-- 목표 달성 현황 -->
+<div class="card" id="goalPage">
+  <h2>목표 달성 현황</h2>
+  <div class="goal-status" id="goalStatus"></div>
+</div>
 
-  <!-- 상세 -->
-  <div class="card hidden" id="detailPage">
-    <button class="small" onclick="backToMain()">← 돌아가기</button>
-    <h2 id="detailTitle"></h2>
-    <div id="detailList"></div>
-  </div>
+<!-- 상세 페이지 -->
+<div class="card hidden" id="detailPage">
+  <button class="small" onclick="backToMain()">← 돌아가기</button>
+  <h2 id="detailTitle"></h2>
+  <div id="detailList"></div>
+</div>
 
 </div>
 
 <script>
 const records=JSON.parse(localStorage.getItem('exerciseRecords')||'[]');
 const colors={수영:'#27B2A5',달리기:'#FF6363',런닝머신:'#D4F0ED',걷기:'#FFC1C1','웨이트 트레이닝':'#f59e0b'};
-let viewDate=new Date();let chart;
+let viewDate=new Date(); let chart;
 
-function toggleForm(){document.getElementById('form').classList.toggle('hidden');}
-
+function toggleForm(){form.classList.toggle('hidden')}
 function addRecord(){
-  const d=date.value,e=exercise.value,c=+calorie.value,t=+time.value;
-  if(!d||!c||!t) return alert('모두 입력하세요');
-  records.push({date:d,exercise:e,calorie:c,time:t});
-  localStorage.setItem('exerciseRecords',JSON.stringify(records));
-  render();
-}
-
-function changeMonth(diff){viewDate.setMonth(viewDate.getMonth()+diff);render();}
+  if(!date.value||!calorie.value||!time.value) return alert('모두 입력하세요');
+  records.push({date:date.value,exercise:exercise.value,calorie:+calorie.value,time:+time.value});
+  localStorage.setItem('exerciseRecords',JSON.stringify(records)); render();}
+function changeMonth(d){viewDate.setMonth(viewDate.getMonth()+d);render()}
 
 function openDetail(date){
-  document.getElementById('mainPage').classList.add('hidden');
-  document.getElementById('calendarPage').classList.add('hidden');
-  document.getElementById('detailPage').classList.remove('hidden');
-  detailTitle.innerText=date;
-  detailList.innerHTML='';
+  mainPage.classList.add('hidden');calendarPage.classList.add('hidden');chartPage.classList.add('hidden');goalPage.classList.add('hidden');
+  detailPage.classList.remove('hidden');detailTitle.innerText=date;detailList.innerHTML='';
   records.filter(r=>r.date===date).forEach((r,i)=>{
-    const div=document.createElement('div');
-    div.innerHTML=`${r.exercise} ${r.calorie}kcal <button class="small" onclick="deleteRecord('${date}',${i})">삭제</button>`;
-    detailList.appendChild(div);
+    detailList.innerHTML+=`${r.exercise} ${r.calorie}kcal <button class='small' onclick="deleteRecord('${date}',${i})">삭제</button><br>`;
   });
 }
+function deleteRecord(date,i){
+  const list=records.filter(r=>r.date===date);records.splice(records.indexOf(list[i]),1);
+  localStorage.setItem('exerciseRecords',JSON.stringify(records));openDetail(date);render();}
+function backToMain(){detailPage.classList.add('hidden');mainPage.classList.remove('hidden');calendarPage.classList.remove('hidden');chartPage.classList.remove('hidden');goalPage.classList.remove('hidden')}
 
-function deleteRecord(date,index){
-  const list=records.filter(r=>r.date===date);
-  const target=list[index];
-  const idx=records.indexOf(target);
-  records.splice(idx,1);
-  localStorage.setItem('exerciseRecords',JSON.stringify(records));
-  openDetail(date);render();
-}
-
-function backToMain(){
-  detailPage.classList.add('hidden');
-  mainPage.classList.remove('hidden');
-  calendarPage.classList.remove('hidden');
-}
+function renderGoalStatus(){
+  goalStatus.innerHTML='';const now=new Date();const y=now.getFullYear();const nowKey=`${y}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  for(let m=1;m<=4;m++){const key=`${y}-${String(m).padStart(2,'0')}`;
+    const total=records.filter(r=>r.date.startsWith(key)).reduce((a,b)=>a+b.calorie,0);
+    let icon=''; if(key===nowKey) icon='⏳'; else if(key<nowKey) icon=total>=6000?'✅':'❌';
+    goalStatus.innerHTML+=`<div class='goal-item'><div>${m}월</div><div>${icon}</div></div>`;
+  }}
 
 function render(){
-  const y=viewDate.getFullYear(),m=viewDate.getMonth();
-  const key=`${y}-${String(m+1).padStart(2,'0')}`;
+  const y=viewDate.getFullYear(),m=viewDate.getMonth();const key=`${y}-${String(m+1).padStart(2,'0')}`;
+  calendarMonth.innerText=`${m+1}월`;
   let total=0,map={},dayMap={};
   records.forEach(r=>{if(r.date.startsWith(key)){total+=r.calorie;map[r.exercise]=(map[r.exercise]||0)+r.calorie;dayMap[r.date]=(dayMap[r.date]||0)+r.calorie;}});
   monthTitle.innerText=`${m+1}월 총 운동 칼로리`;monthTotal.innerText=total+' kcal';
@@ -153,9 +134,10 @@ function render(){
   chart=new Chart(lineChart,{type:'line',data:{labels:Object.keys(map),datasets:[{data:Object.values(map),borderColor:'#27B2A5',pointRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{display:false}}}});
 
   calendar.innerHTML='';const days=new Date(y,m+1,0).getDate();
-  for(let i=1;i<=days;i++){const d=`${key}-${String(i).padStart(2,'0')}`;calendar.innerHTML+=`<div class='day' onclick="openDetail('${d}')">${i}<br><span class='kcal'>${dayMap[d]||''}</span></div>`;}
-}
+  for(let i=1;i<=days;i++){const d=`${key}-${String(i).padStart(2,'0')}`;calendar.innerHTML+=`<div class='day' onclick="openDetail('${d}')">${i}<br><span class='kcal'>${dayMap[d]||''}</span></div>`}
 
+  renderGoalStatus();
+}
 render();
 </script>
 </body>
