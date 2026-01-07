@@ -27,12 +27,18 @@
     canvas{max-height:120px}
     .goal-row{display:flex;justify-content:space-around;text-align:center}
     .goal-icon{font-size:14px;margin-top:4px}
+    /* detail page */
+    #detailPage{display:none}
+    .detail-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}
+    .delete-btn{background:#FF6363;color:#fff;border:none;border-radius:8px;padding:4px 8px;font-size:12px}
+    .back-btn{margin-bottom:10px;background:#27B2A5;color:#fff;border:none;border-radius:10px;padding:8px 12px}
   </style>
 </head>
 <body>
 <header>🏃‍♂️ Burning 🔥</header>
-<div class="container">
 
+<!-- MAIN PAGE -->
+<div id="mainPage" class="container">
   <div class="card">
     <h2 id="monthTitle"></h2>
     <h1 id="monthTotal"></h1>
@@ -64,9 +70,17 @@
   </div>
 </div>
 
+<!-- DETAIL PAGE -->
+<div id="detailPage" class="container">
+  <button class="back-btn" onclick="closeDetail()">← 돌아가기</button>
+  <div class="card">
+    <h2 id="detailDate"></h2>
+    <div id="detailList"></div>
+  </div>
+</div>
+
 <script>
-function openForm(){alert('운동 기록 폼 페이지 연결 예정');}
-function openDetail(date){alert(date+' 상세 페이지 연결 예정');}
+function openForm(){alert('운동 기록 폼은 다음 단계에서 연결');}
 
 const records = JSON.parse(localStorage.getItem('exerciseRecords') || '[]');
 const monthTitle = document.getElementById('monthTitle');
@@ -81,54 +95,45 @@ let viewDate = new Date();
 const colors = {수영:'#27B2A5',달리기:'#FF6363',런닝머신:'#D4F0ED',걷기:'#FFC1C1','웨이트 트레이닝':'#f59e0b'};
 let chart;
 
-function changeMonth(diff){
-  viewDate.setMonth(viewDate.getMonth() + diff);
-  render();
-}
+function changeMonth(diff){viewDate.setMonth(viewDate.getMonth()+diff);render();}
 
 function render(){
-  const y = viewDate.getFullYear();
-  const m = viewDate.getMonth();
-  const key = `${y}-${String(m+1).padStart(2,'0')}`;
-  calMonth.innerText = `${m+1}월`;
+  const y=viewDate.getFullYear();
+  const m=viewDate.getMonth();
+  const key=`${y}-${String(m+1).padStart(2,'0')}`;
+  calMonth.innerText=`${m+1}월`;
 
-  let total = 0;
-  let map = {};
-  let dayMap = {};
-
-  records.forEach(r => {
+  let total=0,map={},dayMap={};
+  records.forEach(r=>{
     if(r.date.startsWith(key)){
-      total += r.calorie;
-      map[r.exercise] = (map[r.exercise] || 0) + r.calorie;
-      dayMap[r.date] = (dayMap[r.date] || 0) + r.calorie;
+      total+=r.calorie;
+      map[r.exercise]=(map[r.exercise]||0)+r.calorie;
+      dayMap[r.date]=(dayMap[r.date]||0)+r.calorie;
     }
   });
 
-  monthTitle.innerText = `${m+1}월 총 운동 칼로리`;
-  monthTotal.innerText = total + ' kcal';
+  monthTitle.innerText=`${m+1}월 총 운동 칼로리`;
+  monthTotal.innerText=total+' kcal';
 
-  const diff = 6000 - total;
-  if(diff > 0){
-    goalText.innerHTML = `6,000kcal 달성까지 <span style="color:#FF6363">${diff}kcal</span> 남았어요!`;
-  } else {
-    goalText.innerHTML = `짝짝짝! <span style="color:#01888C">${Math.abs(diff)}kcal</span> 더 태웠어요 🎉`;
-  }
+  const diff=6000-total;
+  goalText.innerHTML = diff>0
+    ? `6,000kcal 달성까지 <span style="color:#FF6363">${diff}kcal</span> 남았어요!`
+    : `짝짝짝! <span style="color:#01888C">${Math.abs(diff)}kcal</span> 더 태웠어요 🎉`;
 
-  summaryBar.innerHTML = '';
-  legend.innerHTML = '';
-  Object.keys(map).forEach(k => {
-    const bar = document.createElement('div');
-    bar.style.width = total ? (map[k] / total * 100) + '%' : '0%';
-    bar.style.background = colors[k];
+  summaryBar.innerHTML=''; legend.innerHTML='';
+  Object.keys(map).forEach(k=>{
+    const bar=document.createElement('div');
+    bar.style.width= total ? (map[k]/total*100)+'%' : '0%';
+    bar.style.background=colors[k];
     summaryBar.appendChild(bar);
-    legend.innerHTML += `<span><i class="dot" style="background:${colors[k]}"></i>${k} ${map[k]}kcal</span>`;
+    legend.innerHTML+=`<span><i class="dot" style="background:${colors[k]}"></i>${k} ${map[k]}kcal</span>`;
   });
 
-  calendar.innerHTML = '';
-  const days = new Date(y, m+1, 0).getDate();
+  calendar.innerHTML='';
+  const days=new Date(y,m+1,0).getDate();
   for(let i=1;i<=days;i++){
-    const d = `${key}-${String(i).padStart(2,'0')}`;
-    calendar.innerHTML += `<div class="day" onclick="openDetail('${d}')">${i}<br><span class="kcal">${dayMap[d] || ''}</span></div>`;
+    const d=`${key}-${String(i).padStart(2,'0')}`;
+    calendar.innerHTML+=`<div class="day" onclick="openDetail('${d}')">${i}<br><span class="kcal">${dayMap[d]||''}</span></div>`;
   }
 
   renderChart(map);
@@ -136,48 +141,57 @@ function render(){
 }
 
 function renderChart(map){
-  const ctx = document.getElementById('lineChart');
+  const ctx=document.getElementById('lineChart');
   if(chart) chart.destroy();
-  chart = new Chart(ctx, {
-    type:'line',
-    data:{
-      labels:Object.keys(map),
-      datasets:[{
-        data:Object.values(map),
-        borderColor:'#27B2A5',
-        pointRadius:4,
-        tension:0.4
-      }]
-    },
-    options:{
-      plugins:{legend:{display:false}},
-      scales:{x:{display:true},y:{display:false}}
+  chart=new Chart(ctx,{type:'line',data:{labels:Object.keys(map),datasets:[{data:Object.values(map),borderColor:'#27B2A5',pointRadius:4,tension:.4}]},options:{plugins:{legend:{display:false}},scales:{x:{display:true},y:{display:false}}});
+}
+
+function renderGoalStatus(){
+  goalStatus.innerHTML='';
+  const now=new Date();
+  const nowKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  for(let m=0;m<4;m++){
+    const key=`2026-${String(m+1).padStart(2,'0')}`;
+    const total=records.filter(r=>r.date.startsWith(key)).reduce((a,b)=>a+b.calorie,0);
+    let icon='';
+    if(key===nowKey) icon='⏳';
+    else if(key<nowKey) icon= total>=6000?'✅':'❌';
+    const div=document.createElement('div');
+    div.innerHTML=`<div>${m+1}월</div><div class="goal-icon">${icon}</div>`;
+    goalStatus.appendChild(div);
+  }
+}
+
+function openDetail(date){
+  document.getElementById('mainPage').style.display='none';
+  document.getElementById('detailPage').style.display='block';
+  document.getElementById('detailDate').innerText=date;
+  const list=document.getElementById('detailList');
+  list.innerHTML='';
+  records.forEach((r,idx)=>{
+    if(r.date===date){
+      const div=document.createElement('div');
+      div.className='detail-item';
+      div.innerHTML=`${r.exercise} · ${r.calorie}kcal <button class="delete-btn" onclick="deleteRecord(${idx},'${date}')">삭제</button>`;
+      list.appendChild(div);
     }
   });
 }
 
-function renderGoalStatus(){
-  goalStatus.innerHTML = '';
-  const now = new Date();
-  const nowKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+function deleteRecord(idx,date){
+  records.splice(idx,1);
+  localStorage.setItem('exerciseRecords',JSON.stringify(records));
+  openDetail(date);
+  render();
+}
 
-  for(let m=0;m<4;m++){
-    const key = `2026-${String(m+1).padStart(2,'0')}`;
-    const total = records
-      .filter(r => r.date.startsWith(key))
-      .reduce((a,b) => a + b.calorie, 0);
-
-    let icon = '';
-    if(key === nowKey) icon = '⏳';
-    else if(key < nowKey) icon = total >= 6000 ? '✅' : '❌';
-
-    const div = document.createElement('div');
-    div.innerHTML = `<div>${m+1}월</div><div class="goal-icon">${icon}</div>`;
-    goalStatus.appendChild(div);
-  }
+function closeDetail(){
+  document.getElementById('detailPage').style.display='none';
+  document.getElementById('mainPage').style.display='block';
 }
 
 render();
 </script>
 </body>
 </html>
+
