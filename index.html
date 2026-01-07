@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🏃‍♂️ Burnning 🔥</title>
+  <title>🏃‍♂️ Burning 🔥</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -108,6 +108,8 @@ function renderGoalStatus(){
   }
 }
 
+let chart;
+
 function render(){
   const y=viewDate.getFullYear();
   const m=viewDate.getMonth();
@@ -140,6 +142,27 @@ function render(){
     bar.style.background=colors[k];
     summaryBar.appendChild(bar);
     legend.innerHTML+=`<span><i class="dot" style="background:${colors[k]}"></i>${k} ${map[k]}kcal</span>`;
+  });
+
+  // 📊 종목별 그래프 렌더링
+  const ctx=document.getElementById('lineChart');
+  if(chart) chart.destroy();
+  chart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:Object.keys(map),
+      datasets:[{
+        data:Object.values(map),
+        borderColor:'#27B2A5',
+        tension:.4,
+        fill:false,
+        pointRadius:4
+      }]
+    },
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{x:{display:true},y:{display:false}}
+    }
   });
 
   calendar.innerHTML='';
