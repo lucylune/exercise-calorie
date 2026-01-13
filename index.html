@@ -87,7 +87,12 @@
     <div class="field">
       <label>운동 종목</label>
       <select id="fType">
-        <option>수영</option><option>달리기</option><option>런닝머신</option><option>걷기</option><option>웨이트 트레이닝</option>
+        <option>수영</option>
+        <option>런닝머신</option>
+        <option>스테어 클라이머</option>
+        <option>웨이트 트레이닝</option>
+        <option>걷기</option>
+        <option>등산</option>
       </select>
     </div>
     <div class="field">
@@ -119,13 +124,23 @@
 <script>
 let records = JSON.parse(localStorage.getItem('exerciseRecords')||'[]');
 let viewDate=new Date();
-const colors={수영:'#27B2A5',달리기:'#FF6363',런닝머신:'#D4F0ED',걷기:'#FFC1C1','웨이트 트레이닝':'#f59e0b'};
+const colors={
+  수영:'#27B2A5',
+  런닝머신:'#FF6363',
+  '스테어 클라이머':'#8b5cf6',
+  '웨이트 트레이닝':'#f59e0b',
+  걷기:'#FFC1C1',
+  등산:'#22c55e'
+};
 let chart;
 
 function save(){localStorage.setItem('exerciseRecords',JSON.stringify(records));}
 
 function openForm(){
   fDate.value=new Date().toISOString().slice(0,10);
+  fType.value='수영';
+  fKcal.value='';
+  fMin.value='';
   formModal.classList.add('active');
 }
 function closeForm(){formModal.classList.remove('active');}
@@ -228,9 +243,12 @@ function renderGoalStatus(){
     const key=`2026-${String(m+1).padStart(2,'0')}`;
     const total=records.filter(r=>r.date.startsWith(key)).reduce((a,b)=>a+b.calorie,0);
     let icon='';
-    const nowKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    if(key===nowKey) icon='⏳';
-    else if(key<nowKey) icon=total>=6000?'✅':'❌';
+    if(total>=6000) icon='✅';
+    else{
+      const nowKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+      if(key===nowKey) icon='⏳';
+      else if(key<nowKey) icon='❌';
+    }
     const div=document.createElement('div');
     div.innerHTML=`<div>${m+1}월</div><div class="goal-icon">${icon}</div>`;
     goalStatus.appendChild(div);
